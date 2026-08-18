@@ -53,10 +53,30 @@ const updateProject = (req, res) => {
     res.json(project);
 };
 
+const deleteProject = (req, res) => {
+    const id = parseInt(req.params.id);
+
+    const projectIndex = projects.findIndex(project => project.id === id);
+
+    if (projectIndex === -1) {
+        return res.status(404).json({
+            message: "Project not found"
+        });
+    }
+
+    const deletedProject = projects.splice(projectIndex, 1);
+
+    res.json({
+        message: "Project deleted successfully",
+        project: deletedProject[0]
+    });
+};
+
 
 module.exports = {
     getProjects,
     createProject,
     getProjectById,
-    updateProject
+    updateProject,
+    deleteProject
 };
