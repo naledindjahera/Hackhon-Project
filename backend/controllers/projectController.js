@@ -143,6 +143,13 @@ const getProjectVotes = (req, res) => {
 };
 
 
+const getProjectRankings = (req, res) => {
+    const rankedProjects = [...projects].sort((a, b) => b.votes - a.votes);
+
+    res.json(rankedProjects);
+};
+
+
 module.exports = {
     getProjects,
     createProject,
@@ -150,5 +157,6 @@ module.exports = {
     updateProject,
     deleteProject,
     voteForProject,
-    getProjectVotes
+    getProjectVotes,
+    getProjectRankings
 };
