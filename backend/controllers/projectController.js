@@ -1,7 +1,26 @@
 const projects = require("../data/projects");
 
 const getProjects = (req, res) => {
-    res.json(projects);
+    const { search, category } = req.query;
+
+    let filteredProjects = projects;
+
+    if (search) {
+        const searchTerm = search.toLowerCase();
+
+        filteredProjects = filteredProjects.filter(project =>
+            project.title.toLowerCase().includes(searchTerm) ||
+            project.description.toLowerCase().includes(searchTerm)
+        );
+    }
+
+    if (category) {
+        filteredProjects = filteredProjects.filter(project =>
+            project.category.toLowerCase() === category.toLowerCase()
+        );
+    }
+
+    res.json(filteredProjects);
 };
 
 const createProject = (req, res) => {

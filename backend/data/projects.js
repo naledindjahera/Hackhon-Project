@@ -1,11 +1,27 @@
 const projects = [
     {
         id: 1,
-        title: "Test Project",
-        description: "This is our first project.",
+        title: "Bebras Namibia",
+        description: "A computational thinking project for Namibian learners.",
+        category: "Education",
+        githubUrl: "https://github.com/example/bebras",
+        demoUrl: "https://example.com/bebras"
+    },
+    {
+        id: 2,
+        title: "Namibia Tourism App",
+        description: "An application helping tourists explore Namibia.",
+        category: "Tourism",
+        githubUrl: "https://github.com/example/tourism",
+        demoUrl: "https://example.com/tourism"
+    },
+    {
+        id: 3,
+        title: "Smart Farming Namibia",
+        description: "A technology solution for Namibian farmers.",
         category: "Technology",
-        githubUrl: "https://github.com/",
-        demoUrl: "https://example.com"
+        githubUrl: "https://github.com/example/farming",
+        demoUrl: "https://example.com/farming"
     }
 ];
 
