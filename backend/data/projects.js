@@ -5,7 +5,8 @@ const projects = [
         description: "A computational thinking project for Namibian learners.",
         category: "Education",
         githubUrl: "https://github.com/example/bebras",
-        demoUrl: "https://example.com/bebras"
+        demoUrl: "https://example.com/bebras",
+        votes: 0
     },
     {
         id: 2,
@@ -13,7 +14,8 @@ const projects = [
         description: "An application helping tourists explore Namibia.",
         category: "Tourism",
         githubUrl: "https://github.com/example/tourism",
-        demoUrl: "https://example.com/tourism"
+        demoUrl: "https://example.com/tourism",
+        votes: 0
     },
     {
         id: 3,
@@ -21,7 +23,8 @@ const projects = [
         description: "A technology solution for Namibian farmers.",
         category: "Technology",
         githubUrl: "https://github.com/example/farming",
-        demoUrl: "https://example.com/farming"
+        demoUrl: "https://example.com/farming",
+        votes: 0
     }
 ];
 

@@ -105,11 +105,50 @@ const deleteProject = (req, res) => {
     });
 };
 
+const voteForProject = (req, res) => {
+    const id = parseInt(req.params.id);
+
+    const project = projects.find(project => project.id === id);
+
+    if (!project) {
+        return res.status(404).json({
+            message: "Project not found"
+        });
+    }
+
+    project.votes += 1;
+
+    res.json({
+        message: "Vote recorded successfully",
+        projectId: project.id,
+        votes: project.votes
+    });
+};
+
+const getProjectVotes = (req, res) => {
+    const id = parseInt(req.params.id);
+
+    const project = projects.find(project => project.id === id);
+
+    if (!project) {
+        return res.status(404).json({
+            message: "Project not found"
+        });
+    }
+
+    res.json({
+        projectId: project.id,
+        votes: project.votes
+    });
+};
+
 
 module.exports = {
     getProjects,
     createProject,
     getProjectById,
     updateProject,
-    deleteProject
+    deleteProject,
+    voteForProject,
+    getProjectVotes
 };
