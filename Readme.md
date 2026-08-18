@@ -1,0 +1,1 @@
+Keep in mind the .env.example file is a blueprint for dev 2 to fill in their local credentials, ensuring no leaks of passwords on GitHub hehe.
