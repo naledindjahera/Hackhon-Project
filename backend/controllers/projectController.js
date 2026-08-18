@@ -19,7 +19,44 @@ const createProject = (req, res) => {
     res.status(201).json(newProject);
 };
 
+const getProjectById = (req, res) => {
+    const id = parseInt(req.params.id);
+
+    const project = projects.find(project => project.id === id);
+
+    if (!project) {
+        return res.status(404).json({
+            message: "Project not found"
+        });
+    }
+
+    res.json(project);
+};
+
+const updateProject = (req, res) => {
+    const id = parseInt(req.params.id);
+
+    const project = projects.find(project => project.id === id);
+
+    if (!project) {
+        return res.status(404).json({
+            message: "Project not found"
+        });
+    }
+
+    project.title = req.body.title ?? project.title;
+    project.description = req.body.description ?? project.description;
+    project.category = req.body.category ?? project.category;
+    project.githubUrl = req.body.githubUrl ?? project.githubUrl;
+    project.demoUrl = req.body.demoUrl ?? project.demoUrl;
+
+    res.json(project);
+};
+
+
 module.exports = {
     getProjects,
-    createProject
+    createProject,
+    getProjectById,
+    updateProject
 };
