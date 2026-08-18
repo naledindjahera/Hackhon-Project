@@ -1,5 +1,6 @@
 const express = require("express");
 const projectRoutes = require("./routes/projectRoutes");
+const authRoutes = require("./routes/authRoutes");
 
 const app = express();
 const PORT = 3000;
@@ -15,6 +16,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/projects", projectRoutes);
+app.use("/api/auth", authRoutes);
 
 
 // Handle unknown routes
