@@ -9,13 +9,15 @@ const {
     deleteProject,
     voteForProject,
     getProjectVotes,
-    getProjectRankings
+    getProjectRankings,
+    getCategories
 } = require("../controllers/projectController");
 
 router.get("/", getProjects);
 router.post("/", createProject);
 
 router.get("/rankings", getProjectRankings);
+router.get("/categories", getCategories);
 
 
 router.get("/:id", getProjectById);

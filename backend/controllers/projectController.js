@@ -149,6 +149,12 @@ const getProjectRankings = (req, res) => {
     res.json(rankedProjects);
 };
 
+const getCategories = (req, res) => {
+    const categories = [...new Set(projects.map(project => project.category))];
+
+    res.json(categories);
+};
+
 
 module.exports = {
     getProjects,
@@ -158,5 +164,6 @@ module.exports = {
     deleteProject,
     voteForProject,
     getProjectVotes,
-    getProjectRankings
+    getProjectRankings,
+    getCategories
 };

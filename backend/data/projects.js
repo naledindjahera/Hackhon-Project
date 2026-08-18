@@ -25,6 +25,15 @@ const projects = [
         githubUrl: "https://github.com/example/farming",
         demoUrl: "https://example.com/farming",
         votes: 0
+    },
+        {
+        id: 4,
+        title: "Another Education Project",
+        description: "Another education project.",
+        category: "Education",
+        githubUrl: "https://github.com/example/farming",
+        demoUrl: "https://example.com/farming",
+        votes: 2
     }
 ];
 
