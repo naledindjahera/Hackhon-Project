@@ -5,13 +5,27 @@ const getProjects = (req, res) => {
 };
 
 const createProject = (req, res) => {
+    const {
+        title,
+        description,
+        category,
+        githubUrl,
+        demoUrl
+    } = req.body;
+
+    if (!title || !description || !category) {
+        return res.status(400).json({
+            message: "Title, description and category are required"
+        });
+    }
+
     const newProject = {
         id: projects.length + 1,
-        title: req.body.title,
-        description: req.body.description,
-        category: req.body.category,
-        githubUrl: req.body.githubUrl,
-        demoUrl: req.body.demoUrl
+        title,
+        description,
+        category,
+        githubUrl: githubUrl || "",
+        demoUrl: demoUrl || ""
     };
 
     projects.push(newProject);
