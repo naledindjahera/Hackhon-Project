@@ -1,5 +1,5 @@
 const bcrypt = require("bcryptjs");
-const users = require("../data/users");
+const users = require("../backend/data/users");
 
 const register = async (req, res, next) => {    try {
         const { username, email, password } = req.body;
