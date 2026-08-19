@@ -1,160 +1,203 @@
-const projects = require("../data/projects");
+const pool = require("../db");
 
-const getProjects = (req, res) => {
-    const { search, category } = req.query;
+const getProjects = async (req, res) => {
+    try {
+        const { search, category } = req.query;
+        let sql = "SELECT * FROM projects WHERE 1=1";
+        const params = [];
 
-    let filteredProjects = projects;
+        if (search) {
+            sql += " AND (LOWER(title) LIKE ? OR LOWER(description) LIKE ?)";
+            const searchTerm = `%${search.toLowerCase()}%`;
+            params.push(searchTerm, searchTerm);
+        }
 
-    if (search) {
-        const searchTerm = search.toLowerCase();
+        if (category) {
+            sql += " AND LOWER(category) = ?";
+            params.push(category.toLowerCase());
+        }
 
-        filteredProjects = filteredProjects.filter(project =>
-            project.title.toLowerCase().includes(searchTerm) ||
-            project.description.toLowerCase().includes(searchTerm)
+        const [rows] = await pool.query(sql, params);
+        res.json(rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to retrieve projects" });
+    }
+};
+
+const createProject = async (req, res) => {
+    try {
+        const { title, description, category, githubUrl, demoUrl, teamName } = req.body;
+
+        if (!title || !description || !category) {
+            return res.status(400).json({
+                message: "Title, description and category are required"
+            });
+        }
+
+        // Get uploaded file path from Multer or fallback to text field
+        const image = req.file ? `/uploads/${req.file.filename}` : (req.body.image || "");
+
+        const [result] = await pool.query(
+            `INSERT INTO projects (title, description, category, github_url, demo_url, image, team_name) 
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [title, description, category, githubUrl || "", demoUrl || "", image, teamName || ""]
         );
-    }
 
-    if (category) {
-        filteredProjects = filteredProjects.filter(project =>
-            project.category.toLowerCase() === category.toLowerCase()
+        res.status(201).json({
+            id: result.insertId,
+            title,
+            description,
+            category,
+            githubUrl: githubUrl || "",
+            demoUrl: demoUrl || "",
+            image
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to create project" });
+    }
+};
+
+const getProjectById = async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        const [rows] = await pool.query("SELECT * FROM projects WHERE id = ?", [id]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: "Project not found" });
+        }
+
+        res.json(rows[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to retrieve project" });
+    }
+};
+
+const updateProject = async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        const [rows] = await pool.query("SELECT * FROM projects WHERE id = ?", [id]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ message: "Project not found" });
+        }
+
+        const existing = rows[0];
+        const title = req.body.title ?? existing.title;
+        const description = req.body.description ?? existing.description;
+        const category = req.body.category ?? existing.category;
+        const githubUrl = req.body.githubUrl ?? existing.github_url;
+        const demoUrl = req.body.demoUrl ?? existing.demo_url;
+        
+        // Preserve existing image if no new file uploaded
+        const image = req.file ? `/uploads/${req.file.filename}` : existing.image;
+
+        await pool.query(
+            `UPDATE projects SET title=?, description=?, category=?, github_url=?, demo_url=?, image=? WHERE id=?`,
+            [title, description, category, githubUrl, demoUrl, image, id]
         );
-    }
 
-    res.json(filteredProjects);
+        res.json({ id, title, description, category, githubUrl, demoUrl, image });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to update project" });
+    }
 };
 
-const createProject = (req, res) => {
-    const {
-        title,
-        description,
-        category,
-        githubUrl,
-        demoUrl
-    } = req.body;
+const deleteProject = async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        const [rows] = await pool.query("SELECT * FROM projects WHERE id = ?", [id]);
 
-    if (!title || !description || !category) {
-        return res.status(400).json({
-            message: "Title, description and category are required"
+        if (rows.length === 0) {
+            return res.status(404).json({ message: "Project not found" });
+        }
+
+        await pool.query("DELETE FROM projects WHERE id = ?", [id]);
+
+        res.json({
+            message: "Project deleted successfully",
+            project: rows[0]
         });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to delete project" });
     }
-
-    const newProject = {
-        id: projects.length + 1,
-        title,
-        description,
-        category,
-        githubUrl: githubUrl || "",
-        demoUrl: demoUrl || ""
-    };
-
-    projects.push(newProject);
-
-    res.status(201).json(newProject);
 };
 
-const getProjectById = (req, res) => {
-    const id = parseInt(req.params.id);
+const voteForProject = async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        const userId = req.user ? req.user.id : null;
 
-    const project = projects.find(project => project.id === id);
+        const [project] = await pool.query("SELECT * FROM projects WHERE id = ?", [id]);
+        if (project.length === 0) {
+            return res.status(404).json({ message: "Project not found" });
+        }
 
-    if (!project) {
-        return res.status(404).json({
-            message: "Project not found"
+        if (userId) {
+            await pool.query(
+                `INSERT INTO votes (project_id, user_id, score) VALUES (?, ?, 1)
+                 ON DUPLICATE KEY UPDATE score = score`,
+                [id, userId]
+            );
+        }
+
+        const [voteCount] = await pool.query("SELECT COUNT(*) AS total FROM votes WHERE project_id = ?", [id]);
+
+        res.json({
+            message: "Vote recorded successfully",
+            projectId: id,
+            votes: voteCount[0].total
         });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to record vote" });
     }
-
-    res.json(project);
 };
 
-const updateProject = (req, res) => {
-    const id = parseInt(req.params.id);
+const getProjectVotes = async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        const [voteCount] = await pool.query("SELECT COUNT(*) AS total FROM votes WHERE project_id = ?", [id]);
 
-    const project = projects.find(project => project.id === id);
-
-    if (!project) {
-        return res.status(404).json({
-            message: "Project not found"
+        res.json({
+            projectId: id,
+            votes: voteCount[0].total
         });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to retrieve votes" });
     }
-
-    project.title = req.body.title ?? project.title;
-    project.description = req.body.description ?? project.description;
-    project.category = req.body.category ?? project.category;
-    project.githubUrl = req.body.githubUrl ?? project.githubUrl;
-    project.demoUrl = req.body.demoUrl ?? project.demoUrl;
-
-    res.json(project);
 };
 
-const deleteProject = (req, res) => {
-    const id = parseInt(req.params.id);
-
-    const projectIndex = projects.findIndex(project => project.id === id);
-
-    if (projectIndex === -1) {
-        return res.status(404).json({
-            message: "Project not found"
-        });
+const getProjectRankings = async (req, res) => {
+    try {
+        const [rows] = await pool.query(`
+            SELECT p.*, COUNT(v.id) AS votes 
+            FROM projects p 
+            LEFT JOIN votes v ON p.id = v.project_id 
+            GROUP BY p.id 
+            ORDER BY votes DESC
+        `);
+        res.json(rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to retrieve rankings" });
     }
-
-    const deletedProject = projects.splice(projectIndex, 1);
-
-    res.json({
-        message: "Project deleted successfully",
-        project: deletedProject[0]
-    });
 };
 
-const voteForProject = (req, res) => {
-    const id = parseInt(req.params.id);
-
-    const project = projects.find(project => project.id === id);
-
-    if (!project) {
-        return res.status(404).json({
-            message: "Project not found"
-        });
+const getCategories = async (req, res) => {
+    try {
+        const [rows] = await pool.query("SELECT DISTINCT category FROM projects WHERE category IS NOT NULL AND category != ''");
+        res.json(rows.map(r => r.category));
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to retrieve categories" });
     }
-
-    project.votes += 1;
-
-    res.json({
-        message: "Vote recorded successfully",
-        projectId: project.id,
-        votes: project.votes
-    });
 };
-
-const getProjectVotes = (req, res) => {
-    const id = parseInt(req.params.id);
-
-    const project = projects.find(project => project.id === id);
-
-    if (!project) {
-        return res.status(404).json({
-            message: "Project not found"
-        });
-    }
-
-    res.json({
-        projectId: project.id,
-        votes: project.votes
-    });
-};
-
-
-const getProjectRankings = (req, res) => {
-    const rankedProjects = [...projects].sort((a, b) => b.votes - a.votes);
-
-    res.json(rankedProjects);
-};
-
-const getCategories = (req, res) => {
-    const categories = [...new Set(projects.map(project => project.category))];
-
-    res.json(categories);
-};
-
 
 module.exports = {
     getProjects,
