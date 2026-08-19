@@ -21,10 +21,13 @@ export default function Gallery() {
       .list()
       .then((data) => {
         if (cancelled) return;
-        setAllProjects(data.projects || []);
+        // Supports raw arrays [...] as well as object responses { projects: [...] }
+        const list = Array.isArray(data) ? data : (data?.projects || []);
+        setAllProjects(list);
         setStatus("ready");
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error("Failed to load backend projects:", err);
         if (cancelled) return;
         setAllProjects(mockProjects);
         setStatus("ready");
@@ -38,18 +41,34 @@ export default function Gallery() {
   const filtered = allProjects
     .filter((p) => {
       const q = search.toLowerCase();
+      
+      const titleName = (p.name || p.title || "").toLowerCase();
+      const tagline = (p.tagline || p.description || "").toLowerCase();
+
+      // Normalize tech stack whether array, stringified JSON, or comma-separated
+      let techArray = [];
+      if (Array.isArray(p.tech)) {
+        techArray = p.tech;
+      } else if (typeof p.tech === "string") {
+        try {
+          techArray = JSON.parse(p.tech);
+        } catch {
+          techArray = p.tech.split(",").map((t) => t.trim());
+        }
+      }
+
       return (
         !q ||
-        p.name.toLowerCase().includes(q) ||
-        p.tagline.toLowerCase().includes(q) ||
-        p.tech.some((t) => t.toLowerCase().includes(q))
+        titleName.includes(q) ||
+        tagline.includes(q) ||
+        (Array.isArray(techArray) && techArray.some((t) => String(t).toLowerCase().includes(q)))
       );
     })
     .filter((p) => !category || p.category === category)
     .sort((a, b) => {
-      if (sort === "rating") return b.rating - a.rating;
-      if (sort === "votes") return b.votes - a.votes;
-      if (sort === "new") return new Date(b.createdAt) - new Date(a.createdAt);
+      if (sort === "rating") return (b.rating || 0) - (a.rating || 0);
+      if (sort === "votes") return (b.votes || 0) - (a.votes || 0);
+      if (sort === "new") return new Date(b.createdAt || b.created_at || 0) - new Date(a.createdAt || a.created_at || 0);
       return 0;
     });
 
@@ -90,7 +109,7 @@ export default function Gallery() {
           <p className="text-muted small">{filtered.length} project{filtered.length !== 1 && "s"} found</p>
           <div className="row g-4">
             {filtered.map((p) => (
-              <div className="col-12 col-sm-6 col-lg-4" key={p.id}>
+              <div className="col-12 col-sm-6 col-lg-4" key={p.id || p._id}>
                 <ProjectCard project={p} />
               </div>
             ))}

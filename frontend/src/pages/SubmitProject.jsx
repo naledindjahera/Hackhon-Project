@@ -18,8 +18,9 @@ const initialForm = {
 export default function SubmitProject() {
   const navigate = useNavigate();
   const [form, setForm] = useState(initialForm);
+  const [imageFile, setImageFile] = useState(null);
   const [errors, setErrors] = useState([]);
-  const [status, setStatus] = useState("idle"); // idle | submitting | success
+  const [status, setStatus] = useState("idle");
 
   function update(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -31,6 +32,7 @@ export default function SubmitProject() {
     if (!form.tagline.trim()) errs.push("A short tagline is required.");
     if (!form.description.trim()) errs.push("A description is required.");
     if (!form.team.trim()) errs.push("Team name is required.");
+    if (!imageFile) errs.push("A project image is required.");
     if (form.github && !/^https?:\/\//i.test(form.github)) {
       errs.push("GitHub link must start with http:// or https://");
     }
@@ -51,24 +53,33 @@ export default function SubmitProject() {
     setErrors([]);
     setStatus("submitting");
 
-    const payload = {
-      name: form.name.trim(),
-      tagline: form.tagline.trim(),
-      description: form.description.trim(),
-      team: form.team.trim(),
-      category: form.category,
-      tech: form.techInput
-        .split(",")
-        .map((t) => t.trim())
-        .filter(Boolean),
-      github: form.github.trim(),
-      demo: form.demo.trim(),
-    };
+    // Construct FormData object to handle image upload
+    const formData = new FormData();
+    formData.append("title", form.name.trim());
+    formData.append("name", form.name.trim());
+    formData.append("tagline", form.tagline.trim());
+    formData.append("description", form.description.trim());
+    formData.append("team", form.team.trim());
+    formData.append("category", form.category);
+    formData.append("github", form.github.trim());
+    formData.append("demo", form.demo.trim());
+
+    const techArray = form.techInput
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
+    formData.append("tech", JSON.stringify(techArray));
+
+    // Key 'image' matches Multer's upload.single('image') on the server
+    if (imageFile) {
+      formData.append("image", imageFile);
+    }
 
     try {
-      const created = await projectsApi.create(payload);
+      const created = await projectsApi.create(formData);
       setStatus("success");
-      setTimeout(() => navigate(`/projects/${created.id}`), 1200);
+      const projectId = created?.id || created?.projectId || created?.insertId;
+      setTimeout(() => navigate(`/projects/${projectId}`), 1200);
     } catch (err) {
       setStatus("idle");
       setErrors(err.details || [err.message || "Something went wrong. Please try again."]);
@@ -119,6 +130,20 @@ export default function SubmitProject() {
                 value={form.name}
                 onChange={(e) => update("name", e.target.value)}
                 placeholder="e.g. EcoTrack"
+                required
+              />
+            </div>
+
+            <div className="mb-3">
+              <label htmlFor="image" className="form-label">
+                Project Image *
+              </label>
+              <input
+                id="image"
+                type="file"
+                className="form-control"
+                accept="image/png, image/jpeg, image/jpg, image/webp"
+                onChange={(e) => setImageFile(e.target.files[0])}
                 required
               />
             </div>
@@ -195,7 +220,7 @@ export default function SubmitProject() {
                 className="form-control"
                 value={form.techInput}
                 onChange={(e) => update("techInput", e.target.value)}
-                placeholder="React, Node.js, MongoDB"
+                placeholder="React, Node.js, MySQL"
               />
             </div>
 

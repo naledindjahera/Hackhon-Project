@@ -5,9 +5,26 @@
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
 async function request(path, options = {}) {
+  const token = localStorage.getItem("token"); // Retrieve JWT
+
+  const headers = {};
+
+  // Attach JWT token if available
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  // Only set application/json if the body is NOT FormData
+  if (!(options.body instanceof FormData)) {
+    headers["Content-Type"] = "application/json";
+  }
+
   const res = await fetch(`${BASE_URL}${path}`, {
-    headers: { "Content-Type": "application/json" },
     ...options,
+    headers: {
+      ...headers,
+      ...options.headers,
+    },
   });
 
   let data = null;
@@ -36,10 +53,23 @@ export const projectsApi = {
     return request(`/projects${query ? `?${query}` : ""}`);
   },
   get: (id) => request(`/projects/${id}`),
-  create: (payload) =>
-    request("/projects", { method: "POST", body: JSON.stringify(payload) }),
-  update: (id, payload) =>
-    request(`/projects/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
+  
+  create: (payload) => {
+    const isFormData = payload instanceof FormData;
+    return request("/projects", {
+      method: "POST",
+      body: isFormData ? payload : JSON.stringify(payload),
+    });
+  },
+
+  update: (id, payload) => {
+    const isFormData = payload instanceof FormData;
+    return request(`/projects/${id}`, {
+      method: "PUT",
+      body: isFormData ? payload : JSON.stringify(payload),
+    });
+  },
+
   remove: (id) => request(`/projects/${id}`, { method: "DELETE" }),
   vote: (id, rating) =>
     request(`/projects/${id}/vote`, {

@@ -9,7 +9,7 @@ export default function ProjectDetails() {
   const [project, setProject] = useState(null);
   const [status, setStatus] = useState("loading");
   const [myRating, setMyRating] = useState(0);
-  const [voteState, setVoteState] = useState("idle"); // idle | submitting | done
+  const [voteState, setVoteState] = useState("idle");
 
   useEffect(() => {
     let cancelled = false;
@@ -19,14 +19,15 @@ export default function ProjectDetails() {
       .get(id)
       .then((data) => {
         if (cancelled) return;
-        setProject(data);
+        const item = data?.project || data;
+        setProject(item);
         setStatus("ready");
       })
       .catch(() => {
         if (cancelled) return;
-        const fallback = mockProjects.find((p) => p.id === id);
+        const fallback = mockProjects.find((p) => String(p.id) === String(id));
         if (fallback) {
-          setProject(fallback);
+          setProject({ ...fallback });
           setStatus("ready");
         } else {
           setStatus("error");
@@ -41,21 +42,55 @@ export default function ProjectDetails() {
   async function handleVote(rating) {
     setMyRating(rating);
     setVoteState("submitting");
+
+    // Helper function to calculate updated votes & average rating
+    const calculateNewStats = (item) => {
+      const currentVotes = Number(item.votes) || 0;
+      const currentRating = Number(item.rating) || 0;
+      const newVotes = currentVotes + 1;
+      const newRating = Number(
+        (((currentRating * currentVotes) + rating) / newVotes).toFixed(2)
+      );
+      return { votes: newVotes, rating: newRating };
+    };
+
+    // 1. Sync in-memory mockProjects array so Leaderboard & Gallery pick up the vote
+    const mockIndex = mockProjects.findIndex((p) => String(p.id) === String(id));
+    if (mockIndex !== -1) {
+      const newStats = calculateNewStats(mockProjects[mockIndex]);
+      mockProjects[mockIndex] = {
+        ...mockProjects[mockIndex],
+        ...newStats,
+      };
+    }
+
     try {
       const updated = await projectsApi.vote(id, rating);
-      setProject(updated);
+      const payload = updated?.project || updated || {};
+
+      // 2. Merge server API response into local state
+      setProject((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          ...payload,
+          rating: typeof payload.rating === "number" ? payload.rating : prev.rating,
+          votes: typeof payload.votes === "number" ? payload.votes : prev.votes,
+          image: payload.image || payload.image_url || prev.image || prev.image_url,
+          tech: payload.tech || prev.tech,
+        };
+      });
       setVoteState("done");
     } catch {
-      // API might not be running (mock-data mode) — reflect it optimistically instead.
-      setProject((prev) =>
-        prev
-          ? {
-              ...prev,
-              votes: prev.votes + 1,
-              rating: Number((((prev.rating * prev.votes) + rating) / (prev.votes + 1)).toFixed(2)),
-            }
-          : prev
-      );
+      // 3. Fallback optimistic update if backend API request fails
+      setProject((prev) => {
+        if (!prev) return prev;
+        const newStats = calculateNewStats(prev);
+        return {
+          ...prev,
+          ...newStats,
+        };
+      });
       setVoteState("done");
     }
   }
@@ -72,7 +107,7 @@ export default function ProjectDetails() {
     return (
       <div className="container my-5">
         <ErrorState message="We couldn't find that project." />
-        <div className="text-center">
+        <div className="text-center mt-3">
           <Link to="/gallery" className="sg-btn-primary">
             Back to Gallery
           </Link>
@@ -80,6 +115,36 @@ export default function ProjectDetails() {
       </div>
     );
   }
+
+  // Safe Property Extraction & Fallbacks
+  const name = project.name || project.title || "Untitled Project";
+  const tagline = project.tagline || "";
+  const description = project.description || "No description provided.";
+  const team = project.team || "Anonymous";
+  const category = project.category || "General";
+  const rating = typeof project.rating === "number" ? project.rating.toFixed(1) : "0.0";
+  const votes = project.votes || 0;
+
+  // Safe Tech Stack Normalization
+  let techList = [];
+  if (Array.isArray(project.tech)) {
+    techList = project.tech;
+  } else if (typeof project.tech === "string") {
+    try {
+      const parsed = JSON.parse(project.tech);
+      techList = Array.isArray(parsed) ? parsed : [project.tech];
+    } catch {
+      techList = project.tech.split(",").map((t) => t.trim()).filter(Boolean);
+    }
+  }
+
+  // Image Normalization
+  const rawImage = project.image || project.image_url;
+  const imageUrl = rawImage
+    ? rawImage.startsWith("http")
+      ? rawImage
+      : `http://localhost:5000/${rawImage.replace(/^\/+/, "")}`
+    : null;
 
   return (
     <section className="container my-5">
@@ -89,27 +154,45 @@ export default function ProjectDetails() {
 
       <div className="row g-4">
         <div className="col-lg-8">
-          <div
-            className="rounded-4 mb-4"
-            style={{
-              height: 260,
-              background: "linear-gradient(135deg,#6d28d9,#0a0e27)",
-            }}
-          ></div>
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt={name}
+              className="rounded-4 mb-4 w-100 object-fit-cover"
+              style={{ maxHeight: 340 }}
+              onError={(e) => {
+                e.target.src = "https://via.placeholder.com/800x400?text=Image+Unavailable";
+              }}
+            />
+          ) : (
+            <div
+              className="rounded-4 mb-4 d-flex align-items-center justify-content-center text-white"
+              style={{
+                height: 260,
+                background: "linear-gradient(135deg,#6d28d9,#0a0e27)",
+              }}
+            >
+              <h2>{name}</h2>
+            </div>
+          )}
 
-          <h1>{project.name}</h1>
-          <p className="lead text-muted">{project.tagline}</p>
+          <h1>{name}</h1>
+          {tagline && <p className="lead text-muted">{tagline}</p>}
 
           <div className="mb-3">
-            {project.tech.map((t) => (
-              <span key={t} className="sg-badge sg-badge-default">
-                {t}
-              </span>
-            ))}
+            {techList.length > 0 ? (
+              techList.map((t, index) => (
+                <span key={index} className="sg-badge sg-badge-default me-1">
+                  {t}
+                </span>
+              ))
+            ) : (
+              <span className="text-muted small">No tech tags listed</span>
+            )}
           </div>
 
           <h5 className="mt-4">About this project</h5>
-          <p>{project.description}</p>
+          <p style={{ whiteSpace: "pre-line" }}>{description}</p>
 
           <div className="d-flex gap-3 mt-4">
             {project.github && (
@@ -138,22 +221,22 @@ export default function ProjectDetails() {
             <h5>Project Stats</h5>
             <div className="d-flex justify-content-between py-2 border-bottom">
               <span className="text-muted">Team</span>
-              <strong>{project.team}</strong>
+              <strong>{team}</strong>
             </div>
             <div className="d-flex justify-content-between py-2 border-bottom">
               <span className="text-muted">Category</span>
-              <strong>{project.category}</strong>
+              <strong>{category}</strong>
             </div>
             <div className="d-flex justify-content-between py-2 border-bottom">
               <span className="text-muted">Rating</span>
               <strong>
                 <i className="bi bi-star-fill star me-1"></i>
-                {project.rating.toFixed(1)}
+                {rating}
               </strong>
             </div>
             <div className="d-flex justify-content-between py-2">
               <span className="text-muted">Votes</span>
-              <strong>{project.votes}</strong>
+              <strong>{votes}</strong>
             </div>
 
             <hr />
