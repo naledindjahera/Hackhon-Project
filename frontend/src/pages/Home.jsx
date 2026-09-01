@@ -93,25 +93,25 @@ export default function Home() {
                   </div>
                 </div>
                 <div
-                  className="sg-floating-badge"
+                  className="sg-floating-badge sg-badge-delay-1"
                   style={{ top: -18, right: "35%", background: "#7c5cfc" }}
                 >
                   <i className="bi bi-code-slash"></i>
                 </div>
                 <div
-                  className="sg-floating-badge"
+                  className="sg-floating-badge sg-badge-delay-2"
                   style={{ top: 10, right: -20, background: "#10b981" }}
                 >
                   <i className="bi bi-people-fill"></i>
                 </div>
                 <div
-                  className="sg-floating-badge"
+                  className="sg-floating-badge sg-badge-delay-3"
                   style={{ bottom: -20, right: -10, background: "#ec4899" }}
                 >
                   <i className="bi bi-heart-fill"></i>
                 </div>
                 <div
-                  className="sg-floating-badge"
+                  className="sg-floating-badge sg-badge-delay-4"
                   style={{ top: "40%", left: -20, background: "#3b82f6" }}
                 >
                   <i className="bi bi-star-fill"></i>

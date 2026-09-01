@@ -1,6 +1,17 @@
+import { useEffect, useState } from "react";
 import { NavLink, Link } from "react-router-dom";
 
 export default function Navbar() {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    function onScroll() {
+      setScrolled(window.scrollY > 12);
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   const navItem = (to, label) => (
     <NavLink
       to={to}
@@ -12,7 +23,7 @@ export default function Navbar() {
   );
 
   return (
-    <nav className="navbar navbar-expand-lg sg-navbar sticky-top">
+    <nav className={`navbar navbar-expand-lg sg-navbar sticky-top ${scrolled ? "sg-navbar--scrolled" : ""}`}>
       <div className="container">
         <Link className="navbar-brand d-flex align-items-center gap-2" to="/">
           <span aria-hidden="true">🚀</span>
