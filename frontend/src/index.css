@@ -13,7 +13,7 @@
 
   /* Surfaces */
   --sg-page-bg: #ffffff;
-  --sg-section-alt: #fafafa;
+  --sg-section-alt: #f5f5f5;
   --sg-hero-from: #f5f3ff;
   --sg-hero-to: #e0e7ff;
 
@@ -47,7 +47,7 @@
 
 body {
   font-family: var(--font-body);
-  background: var(--sg-page-bg);
+  background: var(--sg-section-alt);
   color: var(--sg-text-dark);
   margin: 0;
 }
