@@ -43,37 +43,9 @@ a {
   text-decoration: none;
 }
 
-/* ---------- Navbar ---------- */
-.sg-navbar {
-  background: var(--sg-navy-900);
-  padding: 0.9rem 0;
-}
-
-.sg-navbar .navbar-brand {
-  color: var(--sg-white);
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.25rem;
-}
-
-.sg-navbar .navbar-brand .brand-accent {
-  color: var(--sg-violet-400);
-}
-
-.sg-navbar .nav-link {
-  color: #c7c9e0;
-  font-weight: 500;
-  margin: 0 0.35rem;
-}
-
-.sg-navbar .nav-link.active,
-.sg-navbar .nav-link:hover {
-  color: var(--sg-white);
-}
-
-.sg-navbar .nav-link.active {
-  border-bottom: 2px solid var(--sg-violet-500);
-}
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
 
 .sg-btn-primary {
   background: linear-gradient(135deg, var(--sg-violet-500), var(--sg-violet-600));
@@ -105,7 +77,99 @@ a {
   color: var(--sg-white);
 }
 
-/* ---------- Hero ---------- */
+.sg-btn-outline-primary {
+  background: transparent;
+  border: 2px solid var(--sg-violet-500);
+  color: var(--sg-violet-500);
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 0.55rem 1.3rem;
+  transition: all 0.15s ease;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.sg-btn-outline-primary:hover {
+  background: var(--sg-violet-500);
+  color: var(--sg-white);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(109, 40, 217, 0.3);
+}
+
+.sg-btn-outline-danger {
+  background: transparent;
+  border: 2px solid #dc2626;
+  color: #dc2626;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 0.55rem 1.3rem;
+  transition: all 0.15s ease;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.sg-btn-outline-danger:hover {
+  background: #dc2626;
+  color: var(--sg-white);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.3);
+}
+
+/* ==========================================================================
+   Navbar
+   ========================================================================== */
+
+.sg-navbar {
+  background: var(--sg-navy-900);
+  padding: 0.9rem 0;
+}
+
+.sg-navbar .navbar-brand {
+  color: var(--sg-white);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+
+.sg-navbar .navbar-brand .brand-accent {
+  color: var(--sg-violet-400);
+}
+
+.sg-navbar .nav-link {
+  color: #c7c9e0;
+  font-weight: 500;
+  margin: 0 0.35rem;
+}
+
+.sg-navbar .nav-link.active,
+.sg-navbar .nav-link:hover {
+  color: var(--sg-white);
+}
+
+.sg-navbar .nav-link.active {
+  border-bottom: 2px solid var(--sg-violet-500);
+}
+
+.sg-navbar .navbar-text {
+  color: #c7c9e0;
+  font-weight: 500;
+  margin-right: 0.5rem;
+}
+
+.sg-navbar .navbar-toggler {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.sg-navbar .navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.8)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* ==========================================================================
+   Hero
+   ========================================================================== */
+
 .sg-hero {
   background: radial-gradient(
       circle at 78% 30%,
@@ -152,7 +216,10 @@ a {
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.35);
 }
 
-/* ---------- Stats strip ---------- */
+/* ==========================================================================
+   Stats strip
+   ========================================================================== */
+
 .sg-stat-card {
   background: var(--sg-white);
   border-radius: var(--sg-radius-md);
@@ -172,7 +239,10 @@ a {
   font-size: 1.15rem;
 }
 
-/* ---------- Project card ---------- */
+/* ==========================================================================
+   Project card
+   ========================================================================== */
+
 .sg-project-card {
   background: var(--sg-white);
   border-radius: var(--sg-radius-lg);
@@ -189,21 +259,61 @@ a {
   box-shadow: var(--sg-shadow-card-hover);
 }
 
+/* --- Thumbnail --- */
+
 .sg-project-thumb {
-  height: 150px;
-  background: linear-gradient(135deg, var(--sg-violet-600), var(--sg-navy-900));
-  color: var(--sg-white);
-  padding: 1rem 1.1rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
+  height: 180px;
   position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--sg-violet-600), var(--sg-navy-900));
 }
 
-.sg-project-thumb h3 {
-  font-size: 1.05rem;
-  margin: 0;
+.sg-project-thumb.has-image {
+  background: var(--sg-navy-900);
 }
+
+.sg-project-thumb-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.sg-project-thumb-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  padding: 1rem 1.1rem;
+  background: linear-gradient(
+    to top,
+    rgba(10, 14, 39, 0.85) 0%,
+    rgba(10, 14, 39, 0.35) 45%,
+    rgba(10, 14, 39, 0) 75%
+  );
+  z-index: 1;
+}
+
+.sg-project-thumb-overlay h3 {
+  font-size: 1.1rem;
+  color: var(--sg-white);
+  margin: 0;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sg-project-thumb.no-image .sg-project-thumb-overlay {
+  background: none;
+}
+
+/* --- Body --- */
 
 .sg-project-body {
   padding: 1rem 1.1rem 1.2rem;
@@ -216,6 +326,12 @@ a {
   color: var(--sg-text-muted);
   font-size: 0.9rem;
   flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 2.5em;
 }
 
 .sg-badge {
@@ -244,7 +360,10 @@ a {
 
 .sg-meta .star { color: var(--sg-star); }
 
-/* ---------- Section titles ---------- */
+/* ==========================================================================
+   Sections & CTA
+   ========================================================================== */
+
 .sg-section-title {
   font-size: 1.4rem;
   display: flex;
@@ -259,7 +378,10 @@ a {
   text-align: center;
 }
 
-/* ---------- Forms ---------- */
+/* ==========================================================================
+   Forms
+   ========================================================================== */
+
 .sg-form-card {
   background: var(--sg-white);
   border-radius: var(--sg-radius-lg);
@@ -272,112 +394,102 @@ a {
   font-size: 0.9rem;
 }
 
-/* ---------- States ---------- */
+/* --- Image preview on submit form --- */
+
+.sg-image-preview {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--sg-radius-md);
+  overflow: hidden;
+  box-shadow: var(--sg-shadow-card);
+}
+
+.sg-image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.sg-image-preview-remove {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(10, 14, 39, 0.75);
+  color: white;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.sg-image-preview-remove:hover {
+  background: #dc2626;
+}
+
+/* ==========================================================================
+   States (loading, empty, error)
+   ========================================================================== */
+
 .sg-state {
   text-align: center;
   padding: 4rem 1rem;
   color: var(--sg-text-muted);
 }
 
+/* --- Skeletons --- */
+
 .sg-skeleton {
+  background: var(--sg-white);
+  border-radius: var(--sg-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--sg-shadow-card);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.sg-skeleton-thumb {
+  height: 180px;
   background: linear-gradient(90deg, #eceafd 25%, #f7f6fe 37%, #eceafd 63%);
   background-size: 400% 100%;
   animation: sg-shimmer 1.4s ease infinite;
-  border-radius: var(--sg-radius-lg);
-  height: 260px;
 }
+
+.sg-skeleton-body {
+  padding: 1rem 1.1rem 1.2rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.sg-skeleton-line {
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #eceafd 25%, #f7f6fe 37%, #eceafd 63%);
+  background-size: 400% 100%;
+  animation: sg-shimmer 1.4s ease infinite;
+}
+
+.sg-skeleton-line.short { width: 60%; }
+.sg-skeleton-line.tiny  { width: 35%; height: 10px; }
 
 @keyframes sg-shimmer {
   0% { background-position: 100% 50%; }
   100% { background-position: 0 50%; }
 }
 
-/* Respect reduced motion */
-@media (prefers-reduced-motion: reduce) {
-  .sg-project-card, .sg-btn-primary, .sg-skeleton {
-    transition: none;
-    animation: none;
-  }
-}
+/* User avatar (optional, for future navbar upgrade) */
 
-@media (max-width: 767px) {
-  .sg-hero h1 { font-size: 2.1rem; }
-  .sg-hero { padding: 3rem 0 5rem; text-align: center; }
-  .sg-hero p.lead { margin-left: auto; margin-right: auto; }
-}
-
-
-/* ---------- Authentication Buttons ---------- */
-.sg-btn-outline-primary {
-  background: transparent;
-  border: 2px solid var(--sg-violet-500);
-  color: var(--sg-violet-500);
-  font-weight: 600;
-  border-radius: 10px;
-  padding: 0.55rem 1.3rem;
-  transition: all 0.15s ease;
-  text-decoration: none;
-  display: inline-block;
-  cursor: pointer;
-}
-
-.sg-btn-outline-primary:hover {
-  background: var(--sg-violet-500);
-  color: var(--sg-white);
-  transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(109, 40, 217, 0.3);
-}
-
-.sg-btn-outline-danger {
-  background: transparent;
-  border: 2px solid #dc2626;
-  color: #dc2626;
-  font-weight: 600;
-  border-radius: 10px;
-  padding: 0.55rem 1.3rem;
-  transition: all 0.15s ease;
-  text-decoration: none;
-  display: inline-block;
-  cursor: pointer;
-}
-
-.sg-btn-outline-danger:hover {
-  background: #dc2626;
-  color: var(--sg-white);
-  transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.3);
-}
-
-/* ---------- Navbar user greeting ---------- */
-.sg-navbar .navbar-text {
-  color: #c7c9e0;
-  font-weight: 500;
-  margin-right: 0.5rem;
-}
-
-/* ---------- Mobile responsive adjustments ---------- */
-@media (max-width: 991px) {
-  .sg-navbar .navbar-nav {
-    margin: 0.5rem 0;
-  }
-  
-  .sg-navbar .d-flex.gap-2 {
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-top: 0.5rem;
-  }
-}
-
-/* ---------- Navbar toggler (hamburger menu) ---------- */
-.sg-navbar .navbar-toggler {
-  border-color: rgba(255, 255, 255, 0.3);
-}
-
-.sg-navbar .navbar-toggler-icon {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.8)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
-}
-
-/* ---------- Optional: Add user avatar ---------- */
 .sg-user-avatar {
   width: 32px;
   height: 32px;
@@ -390,4 +502,51 @@ a {
   font-weight: 600;
   font-size: 0.9rem;
   margin-right: 0.5rem;
+}
+
+/* Motion preferences */
+
+@media (prefers-reduced-motion: reduce) {
+  .sg-project-card,
+  .sg-btn-primary,
+  .sg-skeleton-thumb,
+  .sg-skeleton-line {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* Responsive — tablet */
+
+@media (max-width: 991px) {
+  .sg-navbar .navbar-nav {
+    margin: 0.5rem 0;
+  }
+
+  .sg-navbar .d-flex.gap-2 {
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 0.5rem;
+  }
+}
+
+/* Responsive — mobile */
+
+@media (max-width: 767px) {
+  .sg-hero h1 { font-size: 2.1rem; }
+  .sg-hero { padding: 3rem 0 4rem; text-align: center; }
+  .sg-hero p.lead { margin-left: auto; margin-right: auto; }
+
+  .sg-project-thumb,
+  .sg-skeleton-thumb {
+    height: 160px;
+  }
+
+  .sg-project-body {
+    padding: 0.9rem 1rem 1rem;
+  }
+
+  .sg-section-title {
+    font-size: 1.2rem;
+  }
 }

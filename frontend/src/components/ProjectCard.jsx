@@ -47,23 +47,27 @@ export default function ProjectCard({ project = {} }) {
     }
   }
 
-  return (
+return (
     <Link to={`/projects/${project.id || project._id}`} className="text-decoration-none">
       <div className="sg-project-card">
-        <div className="sg-project-thumb">
-          {imageUrl ? (
+        <div className={`sg-project-thumb ${imageUrl ? "has-image" : "no-image"}`}>
+          {imageUrl && (
             <img
               src={imageUrl}
               alt={title}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              className="sg-project-thumb-img"
               onError={(e) => {
                 e.target.style.display = "none";
+                e.target.parentElement.classList.remove("has-image");
+                e.target.parentElement.classList.add("no-image");
               }}
             />
-          ) : (
-            <h3>{title}</h3>
           )}
+          <div className="sg-project-thumb-overlay">
+            <h3>{title}</h3>
+          </div>
         </div>
+
         <div className="sg-project-body">
           <p className="desc mb-2">{tagline}</p>
           <div>
