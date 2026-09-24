@@ -112,7 +112,7 @@ export default function Home() {
                 <div className="sg-stat-icon" style={{ background: "#ede8ff", color: "var(--sg-accent)" }}>
                   <i className="bi bi-folder-fill"></i>
                 </div>
-                <h3 className="mb-0">120+</h3>
+                <h3 className="mb-0">10+</h3>
                 <span className="text-muted">Projects</span>
               </div>
             </div>
@@ -121,7 +121,7 @@ export default function Home() {
                 <div className="sg-stat-icon" style={{ background: "#dcfce7", color: "#16a34a" }}>
                   <i className="bi bi-people-fill"></i>
                 </div>
-                <h3 className="mb-0">300+</h3>
+                <h3 className="mb-0">30+</h3>
                 <span className="text-muted">Developers</span>
               </div>
             </div>
@@ -130,7 +130,7 @@ export default function Home() {
                 <div className="sg-stat-icon" style={{ background: "#dbeafe", color: "#2563eb" }}>
                   <i className="bi bi-star-fill"></i>
                 </div>
-                <h3 className="mb-0">50+</h3>
+                <h3 className="mb-0">10+</h3>
                 <span className="text-muted">Teams</span>
               </div>
             </div>
