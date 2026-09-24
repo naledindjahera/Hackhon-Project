@@ -47,8 +47,7 @@ export default function Home() {
               </h1>
               <p className="lead mt-3 mb-4">
                 ShowCase Gallery is the official platform for hackathon teams
-                to showcase their ideas, inspire others, and build the
-                future.
+                to showcase their ideas, inspire others, and build the future.
               </p>
               <div className="d-flex flex-wrap gap-3">
                 <Link to="/gallery" className="sg-btn-primary">
@@ -71,7 +70,7 @@ export default function Home() {
                   <div className="row g-2">
                     {projects.slice(0, 6).map((p) => (
                       <div className="col-4" key={p.id}>
-                     <div className="rounded" style={{ height: 60, background: "linear-gradient(135deg,#a29bfe,#74b9ff)" }}></div> 
+                        <div className="rounded" style={{ height: 60, background: "linear-gradient(135deg,#a29bfe,#74b9ff)" }}></div>
                       </div>
                     ))}
                   </div>
@@ -82,77 +81,81 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ---------- Featured Projects ---------- */}
-      <section className="container my-5">
-        <div className="d-flex justify-content-between align-items-center mb-4">
-          <h2 className="sg-section-title"> Featured Projects</h2>
-          <Link to="/gallery" className="fw-semibold" style={{ color: "var(--sg-accent)" }}>
-           style={{ color: "var(--sg-accent)" }} 
-          </Link>
-        </div>
+      {/* ---------- Featured + Stats (off-white band) ---------- */}
+      <div className="sg-section-alt py-5">
+        <div className="container">
 
-        {status === "loading" && <LoadingGrid count={5} />}
-        {status === "error" && <ErrorState message="Couldn't load projects." />}
-        {status === "ready" && (
-          <div className="row g-4">
-            {projects.map((p) => (
-              <div className="col-12 col-sm-6 col-lg-4 col-xl" key={p.id}>
-                <ProjectCard project={p} />
-              </div>
-            ))}
+          {/* Featured Projects */}
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <h2 className="sg-section-title">🚀 Featured Projects</h2>
+            <Link to="/gallery" className="fw-semibold" style={{ color: "var(--sg-accent)" }}>
+              View all projects <i className="bi bi-arrow-right"></i>
+            </Link>
           </div>
-        )}
-      </section>
 
-      {/* ---------- Stats + CTA ---------- */}
-      <section className="container mb-5">
-        <div className="row g-3">
-          <div className="col-6 col-md-3">
-            <div className="sg-stat-card">
-              <div className="sg-stat-icon" style={{ background: "#ede9fe", color: "#7c5cfc" }}>
-                <i className="bi bi-folder-fill"></i>
-              </div>
-              <h3 className="mb-0">120+</h3>
-              <span className="text-muted">Projects</span>
+          {status === "loading" && <LoadingGrid count={5} />}
+          {status === "error" && <ErrorState message="Couldn't load projects." />}
+          {status === "ready" && (
+            <div className="row g-4">
+              {projects.map((p) => (
+                <div className="col-12 col-sm-6 col-lg-4 col-xl" key={p.id}>
+                  <ProjectCard project={p} />
+                </div>
+              ))}
             </div>
-          </div>
-          <div className="col-6 col-md-3">
-            <div className="sg-stat-card">
-              <div className="sg-stat-icon" style={{ background: "#dcfce7", color: "#16a34a" }}>
-                <i className="bi bi-people-fill"></i>
-              </div>
-              <h3 className="mb-0">300+</h3>
-              <span className="text-muted">Developers</span>
-            </div>
-          </div>
-          <div className="col-6 col-md-3">
-            <div className="sg-stat-card">
-              <div className="sg-stat-icon" style={{ background: "#dbeafe", color: "#2563eb" }}>
-                <i className="bi bi-star-fill"></i>
-              </div>
-              <h3 className="mb-0">50+</h3>
-              <span className="text-muted">Teams</span>
-            </div>
-          </div>
-          <div className="col-6 col-md-3">
-            <div className="sg-stat-card">
-              <div className="sg-stat-icon" style={{ background: "#fee2e2", color: "#dc2626" }}>
-                <i className="bi bi-trophy-fill"></i>
-              </div>
-              <h3 className="mb-0">{totalTeams || 1}</h3>
-              <span className="text-muted">Community</span>
-            </div>
-          </div>
-        </div>
+          )}
 
-        <div className="sg-cta-panel mt-4">
-          <h4>Have an amazing project?</h4>
-          <p className="text-muted mb-3">Share your innovation with the world.</p>
-          <Link to="/submit" className="sg-btn-primary">
-            Submit Your Project
-          </Link>
+          {/* Stats */}
+          <div className="row g-3 mt-5">
+            <div className="col-6 col-md-3">
+              <div className="sg-stat-card">
+                <div className="sg-stat-icon" style={{ background: "#ede8ff", color: "var(--sg-accent)" }}>
+                  <i className="bi bi-folder-fill"></i>
+                </div>
+                <h3 className="mb-0">120+</h3>
+                <span className="text-muted">Projects</span>
+              </div>
+            </div>
+            <div className="col-6 col-md-3">
+              <div className="sg-stat-card">
+                <div className="sg-stat-icon" style={{ background: "#dcfce7", color: "#16a34a" }}>
+                  <i className="bi bi-people-fill"></i>
+                </div>
+                <h3 className="mb-0">300+</h3>
+                <span className="text-muted">Developers</span>
+              </div>
+            </div>
+            <div className="col-6 col-md-3">
+              <div className="sg-stat-card">
+                <div className="sg-stat-icon" style={{ background: "#dbeafe", color: "#2563eb" }}>
+                  <i className="bi bi-star-fill"></i>
+                </div>
+                <h3 className="mb-0">50+</h3>
+                <span className="text-muted">Teams</span>
+              </div>
+            </div>
+            <div className="col-6 col-md-3">
+              <div className="sg-stat-card">
+                <div className="sg-stat-icon" style={{ background: "#fee2e2", color: "#dc2626" }}>
+                  <i className="bi bi-trophy-fill"></i>
+                </div>
+                <h3 className="mb-0">{totalTeams || 1}</h3>
+                <span className="text-muted">Community</span>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA panel */}
+          <div className="sg-cta-panel mt-4">
+            <h4>Have an amazing project?</h4>
+            <p className="text-muted mb-3">Share your innovation with the world.</p>
+            <Link to="/submit" className="sg-btn-primary">
+              Submit Your Project
+            </Link>
+          </div>
+
         </div>
-      </section>
+      </div>
     </>
   );
 }
