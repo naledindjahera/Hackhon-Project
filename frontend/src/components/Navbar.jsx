@@ -4,18 +4,37 @@ import { useState, useEffect } from "react";
 export default function Navbar() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-  const isAuthenticated = !!localStorage.getItem("token");
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    !!localStorage.getItem("token")
+  );
 
   useEffect(() => {
-    const userData = localStorage.getItem("user");
-    if (userData) {
-      try {
-        setUser(JSON.parse(userData));
-      } catch (e) {
-        console.error("Error parsing user data:", e);
+    const syncAuth = () => {
+      const token = localStorage.getItem("token");
+      setIsAuthenticated(!!token);
+
+      const userData = localStorage.getItem("user");
+      if (userData) {
+        try {
+          setUser(JSON.parse(userData));
+        } catch (e) {
+          console.error("Error parsing user data:", e);
+          setUser(null);
+        }
+      } else {
+        setUser(null);
       }
-    }
-  }, [isAuthenticated]);
+    };
+
+    syncAuth();
+    window.addEventListener("auth-change", syncAuth);
+    window.addEventListener("storage", syncAuth);
+
+    return () => {
+      window.removeEventListener("auth-change", syncAuth);
+      window.removeEventListener("storage", syncAuth);
+    };
+  }, []);
 
   const navItem = (to, label) => (
     <NavLink
@@ -30,8 +49,8 @@ export default function Navbar() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    setUser(null);
-    navigate("/login");
+    window.dispatchEvent(new Event("auth-change"));
+    navigate("/");
   };
 
   return (

@@ -5,7 +5,8 @@ const getProjects = async (req, res) => {
     const { search, category } = req.query;
     let sql = `
       SELECT p.*,
-             (SELECT COUNT(*) FROM votes v WHERE v.project_id = p.id) AS real_votes
+             COALESCE((SELECT COUNT(*) FROM votes v WHERE v.project_id = p.id), 0) AS real_votes,
+             COALESCE((SELECT AVG(v.score) FROM votes v WHERE v.project_id = p.id), p.rating, 0) AS real_rating
       FROM projects p
       WHERE 1=1
     `;
@@ -13,8 +14,8 @@ const getProjects = async (req, res) => {
 
     if (search) {
       sql += " AND (LOWER(p.title) LIKE ? OR LOWER(p.description) LIKE ?)";
-      const searchTerm = `%${search.toLowerCase()}%`;
-      params.push(searchTerm, searchTerm);
+      const term = `%${search.toLowerCase()}%`;
+      params.push(term, term);
     }
 
     if (category) {
@@ -28,7 +29,9 @@ const getProjects = async (req, res) => {
     const projects = rows.map((r) => ({
       ...r,
       votes: r.real_votes,
+      rating: Number(r.real_rating || 0).toFixed(2),
       real_votes: undefined,
+      real_rating: undefined,
     }));
 
     res.json({ projects });
@@ -40,10 +43,8 @@ const getProjects = async (req, res) => {
 
 const createProject = async (req, res) => {
     try {
-        // Change "name" to "title" to match your database
         const { title, description, category, githubUrl, demoUrl, teamName } = req.body;
 
-        // Change "name" to "title" in validation
         if (!title || !description || !category) {
             return res.status(400).json({
                 message: "Title, description and category are required"
@@ -52,7 +53,6 @@ const createProject = async (req, res) => {
 
         const image = req.file ? `/uploads/${req.file.filename}` : (req.body.image || "");
 
-        // Change "name" to "title" in the SQL query
         const [result] = await pool.query(
             `INSERT INTO projects (title, description, category, github_url, demo_url, image, team_name) 
              VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -75,29 +75,32 @@ const createProject = async (req, res) => {
 };
 
 const getProjectById = async (req, res) => {
-  try {
-    const id = parseInt(req.params.id);
-    const [rows] = await pool.query(
-      `SELECT p.*,
-              (SELECT COUNT(*) FROM votes v WHERE v.project_id = p.id) AS real_votes
-       FROM projects p
-       WHERE p.id = ?`,
-      [id]
-    );
+    try {
+        const id = parseInt(req.params.id);
+        const [rows] = await pool.query(
+            `SELECT p.*,
+                    COALESCE((SELECT COUNT(*) FROM votes v WHERE v.project_id = p.id), 0) AS real_votes,
+                    COALESCE((SELECT AVG(v.score) FROM votes v WHERE v.project_id = p.id), p.rating, 0) AS real_rating
+             FROM projects p
+             WHERE p.id = ?`,
+            [id]
+        );
 
-    if (rows.length === 0) {
-      return res.status(404).json({ message: "Project not found" });
+        if (rows.length === 0) {
+            return res.status(404).json({ message: "Project not found" });
+        }
+
+        const project = rows[0];
+        project.votes = project.real_votes;
+        project.rating = Number(project.real_rating || 0).toFixed(2);
+        delete project.real_votes;
+        delete project.real_rating;
+
+        res.json(project);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to retrieve project" });
     }
-
-    const project = rows[0];
-    project.votes = project.real_votes;
-    delete project.real_votes;
-
-    res.json(project);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Failed to retrieve project" });
-  }
 };
 
 const updateProject = async (req, res) => {
@@ -110,16 +113,14 @@ const updateProject = async (req, res) => {
         }
 
         const existing = rows[0];
-        // Change "title" to match database column
         const title = req.body.title ?? existing.title;
         const description = req.body.description ?? existing.description;
         const category = req.body.category ?? existing.category;
         const githubUrl = req.body.githubUrl ?? existing.github_url;
         const demoUrl = req.body.demoUrl ?? existing.demo_url;
-        
+
         const image = req.file ? `/uploads/${req.file.filename}` : existing.image;
 
-        // Change "title" in the SQL query
         await pool.query(
             `UPDATE projects SET title=?, description=?, category=?, github_url=?, demo_url=?, image=? WHERE id=?`,
             [title, description, category, githubUrl, demoUrl, image, id]
@@ -172,8 +173,7 @@ const voteForProject = async (req, res) => {
       return res.status(404).json({ message: "Project not found" });
     }
 
-    
-    //vote can update
+    // Vote can be updated by the same user
     await pool.query(
       `INSERT INTO votes (project_id, user_id, score)
        VALUES (?, ?, ?)
@@ -217,16 +217,28 @@ const getProjectVotes = async (req, res) => {
     }
 };
 
+// ✅ FIXED — now also computes live rating from the votes table
 const getProjectRankings = async (req, res) => {
     try {
         const [rows] = await pool.query(`
-            SELECT p.*, COUNT(v.id) AS votes 
-            FROM projects p 
-            LEFT JOIN votes v ON p.id = v.project_id 
-            GROUP BY p.id 
-            ORDER BY votes DESC
+            SELECT p.*,
+                   COUNT(v.id) AS real_votes,
+                   COALESCE(AVG(v.score), p.rating, 0) AS real_rating
+            FROM projects p
+            LEFT JOIN votes v ON p.id = v.project_id
+            GROUP BY p.id
+            ORDER BY real_votes DESC, real_rating DESC
         `);
-        res.json(rows);
+
+        const projects = rows.map((r) => ({
+            ...r,
+            votes: r.real_votes,
+            rating: Number(r.real_rating || 0).toFixed(2),
+            real_votes: undefined,
+            real_rating: undefined,
+        }));
+
+        res.json(projects);
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Failed to retrieve rankings" });

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link , useLocation } from "react-router-dom";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -7,6 +7,8 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();  
+  const from = location.state?.from?.pathname || "/";            
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -28,8 +30,9 @@ export default function Login() {
 
       if (data.token) {
         localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
-        navigate("/");
+        if (data.user) localStorage.setItem("user", JSON.stringify(data.user));
+        window.dispatchEvent(new Event("auth-change"));
+        navigate(from, { replace: true});
       } else {
         setError("Invalid response from server");
       }
