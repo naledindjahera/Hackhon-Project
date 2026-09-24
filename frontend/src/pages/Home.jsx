@@ -71,7 +71,7 @@ export default function Home() {
                   <div className="row g-2">
                     {projects.slice(0, 6).map((p) => (
                       <div className="col-4" key={p.id}>
-                        <div className="rounded" style={{ height: 60, background: "linear-gradient(135deg,#6d28d9,#0a0e27)" }}></div>
+                     <div className="rounded" style={{ height: 60, background: "linear-gradient(135deg,#a29bfe,#74b9ff)" }}></div> 
                       </div>
                     ))}
                   </div>
@@ -85,9 +85,9 @@ export default function Home() {
       {/* ---------- Featured Projects ---------- */}
       <section className="container my-5">
         <div className="d-flex justify-content-between align-items-center mb-4">
-          <h2 className="sg-section-title">🚀 Featured Projects</h2>
-          <Link to="/gallery" className="fw-semibold" style={{ color: "var(--sg-violet-600)" }}>
-            View all projects <i className="bi bi-arrow-right"></i>
+          <h2 className="sg-section-title"> Featured Projects</h2>
+          <Link to="/gallery" className="fw-semibold" style={{ color: "var(--sg-accent)" }}>
+           style={{ color: "var(--sg-accent)" }} 
           </Link>
         </div>
 

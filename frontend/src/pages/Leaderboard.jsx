@@ -87,7 +87,7 @@ function load() {
                   </span>
                   <span
                     className="fw-bold"
-                    style={{ color: "var(--sg-violet-600)" }}
+                    style={{ color: "var(--sg-accent)" }}
                   >
                     {votes} {votes === 1 ? "vote" : "votes"}
                   </span>
