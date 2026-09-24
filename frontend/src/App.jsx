@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home";
 import Gallery from "./pages/Gallery";
 import ProjectDetails from "./pages/ProjectDetails";
@@ -11,7 +12,6 @@ import Register from "./pages/Register";
 import NotFound from "./pages/NotFound";
 
 export default function App() {
-  // Check if token exists in localStorage
   const isAuthenticated = !!localStorage.getItem("token");
 
   return (
@@ -19,24 +19,61 @@ export default function App() {
       <Navbar />
       <main className="flex-grow-1">
         <Routes>
-          {/* Public Home Route */}
-          <Route path="/" element={<Home />} />
-          <Route path="/home" element={<Navigate to="/" replace />} />
-
-          {/* Public Showcase Routes */}
-          <Route path="/gallery" element={<Gallery />} />
-          <Route path="/projects/:id" element={<ProjectDetails />} />
-          <Route path="/leaderboard" element={<Leaderboard />} />
-
-          {/* Protected Submit Route (Requires Login) */}
-          <Route 
-            path="/submit" 
-            element={isAuthenticated ? <SubmitProject /> : <Navigate to="/login" replace />} 
-          />
-
-          {/* Auth Routes */}
+          {/* Public Routes - Always accessible */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+
+          {/* Protected Routes - Require authentication */}
+          <Route 
+            path="/" 
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/home" 
+            element={
+              <ProtectedRoute>
+                <Navigate to="/" replace />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/gallery" 
+            element={
+              <ProtectedRoute>
+                <Gallery />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/projects/:id" 
+            element={
+              <ProtectedRoute>
+                <ProjectDetails />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/leaderboard" 
+            element={
+              <ProtectedRoute>
+                <Leaderboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/submit" 
+            element={
+              <ProtectedRoute>
+                <SubmitProject />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* 404 - Not Found */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

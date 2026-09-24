@@ -1,29 +1,41 @@
 const pool = require("../db");
 
 const getProjects = async (req, res) => {
-    try {
-        const { search, category } = req.query;
-        let sql = "SELECT * FROM projects WHERE 1=1";
-        const params = [];
+  try {
+    const { search, category } = req.query;
+    let sql = `
+      SELECT p.*,
+             (SELECT COUNT(*) FROM votes v WHERE v.project_id = p.id) AS real_votes
+      FROM projects p
+      WHERE 1=1
+    `;
+    const params = [];
 
-        if (search) {
-            // Change "name" to "title"
-            sql += " AND (LOWER(title) LIKE ? OR LOWER(description) LIKE ?)";
-            const searchTerm = `%${search.toLowerCase()}%`;
-            params.push(searchTerm, searchTerm);
-        }
-
-        if (category) {
-            sql += " AND LOWER(category) = ?";
-            params.push(category.toLowerCase());
-        }
-
-        const [rows] = await pool.query(sql, params);
-        res.json({ projects: rows });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Failed to retrieve projects" });
+    if (search) {
+      sql += " AND (LOWER(p.title) LIKE ? OR LOWER(p.description) LIKE ?)";
+      const searchTerm = `%${search.toLowerCase()}%`;
+      params.push(searchTerm, searchTerm);
     }
+
+    if (category) {
+      sql += " AND LOWER(p.category) = ?";
+      params.push(category.toLowerCase());
+    }
+
+    sql += " ORDER BY p.id ASC";
+
+    const [rows] = await pool.query(sql, params);
+    const projects = rows.map((r) => ({
+      ...r,
+      votes: r.real_votes,
+      real_votes: undefined,
+    }));
+
+    res.json({ projects });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to retrieve projects" });
+  }
 };
 
 const createProject = async (req, res) => {
@@ -63,19 +75,29 @@ const createProject = async (req, res) => {
 };
 
 const getProjectById = async (req, res) => {
-    try {
-        const id = parseInt(req.params.id);
-        const [rows] = await pool.query("SELECT * FROM projects WHERE id = ?", [id]);
+  try {
+    const id = parseInt(req.params.id);
+    const [rows] = await pool.query(
+      `SELECT p.*,
+              (SELECT COUNT(*) FROM votes v WHERE v.project_id = p.id) AS real_votes
+       FROM projects p
+       WHERE p.id = ?`,
+      [id]
+    );
 
-        if (rows.length === 0) {
-            return res.status(404).json({ message: "Project not found" });
-        }
-
-        res.json(rows[0]);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Failed to retrieve project" });
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Project not found" });
     }
+
+    const project = rows[0];
+    project.votes = project.real_votes;
+    delete project.real_votes;
+
+    res.json(project);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to retrieve project" });
+  }
 };
 
 const updateProject = async (req, res) => {
@@ -132,34 +154,52 @@ const deleteProject = async (req, res) => {
 };
 
 const voteForProject = async (req, res) => {
-    try {
-        const id = parseInt(req.params.id);
-        const userId = req.user ? req.user.id : null;
+  try {
+    const id = parseInt(req.params.id);
+    const userId = req.user ? req.user.id : null;
+    const score = parseInt(req.body.rating, 10);
 
-        const [project] = await pool.query("SELECT * FROM projects WHERE id = ?", [id]);
-        if (project.length === 0) {
-            return res.status(404).json({ message: "Project not found" });
-        }
-
-        if (userId) {
-            await pool.query(
-                `INSERT INTO votes (project_id, user_id, score) VALUES (?, ?, 1)
-                 ON DUPLICATE KEY UPDATE score = score`,
-                [id, userId]
-            );
-        }
-
-        const [voteCount] = await pool.query("SELECT COUNT(*) AS total FROM votes WHERE project_id = ?", [id]);
-
-        res.json({
-            message: "Vote recorded successfully",
-            projectId: id,
-            votes: voteCount[0].total
-        });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Failed to record vote" });
+    if (!userId) {
+      return res.status(401).json({ message: "Login required to vote" });
     }
+
+    if (!score || score < 1 || score > 5) {
+      return res.status(400).json({ message: "Rating must be between 1 and 5" });
+    }
+
+    const [project] = await pool.query("SELECT * FROM projects WHERE id = ?", [id]);
+    if (project.length === 0) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    
+    //vote can update
+    await pool.query(
+      `INSERT INTO votes (project_id, user_id, score)
+       VALUES (?, ?, ?)
+       ON DUPLICATE KEY UPDATE score = VALUES(score)`,
+      [id, userId, score]
+    );
+
+    const [voteCount] = await pool.query(
+      "SELECT COUNT(*) AS total FROM votes WHERE project_id = ?",
+      [id]
+    );
+    const [avgRow] = await pool.query(
+      "SELECT AVG(score) AS avg_score FROM votes WHERE project_id = ?",
+      [id]
+    );
+
+    res.json({
+      message: "Vote recorded successfully",
+      projectId: id,
+      votes: voteCount[0].total,
+      rating: Number(avgRow[0].avg_score || 0).toFixed(2),
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to record vote" });
+  }
 };
 
 const getProjectVotes = async (req, res) => {

@@ -3,41 +3,35 @@ import { Link } from "react-router-dom";
 import ProjectCard from "../components/ProjectCard";
 import { LoadingGrid, ErrorState } from "../components/StateBlocks";
 import { projectsApi } from "../api/api";
-import { mockProjects } from "../data/mockProjects";
 
 export default function Home() {
   const [projects, setProjects] = useState([]);
-  const [status, setStatus] = useState("loading"); // loading | ready | error
+  const [status, setStatus] = useState("loading");
 
   useEffect(() => {
     let cancelled = false;
     setStatus("loading");
 
     projectsApi
-  .list({ sort: "rating" })
-  .then((data) => {
-    if (cancelled) return;
-    // Handle both array and object formats
-    const projectsArray = Array.isArray(data) ? data : (data.projects || []);
-    setProjects(projectsArray.slice(0, 5));
-    setStatus("ready");
-  })
-  .catch((err) => {
-    if (cancelled) return;
-    console.error('API Error:', err);
-    // Only fallback to mock if it's a network error
-    if (err.message.includes('fetch') || err.message.includes('network')) {
-      setProjects(mockProjects.slice(0, 5));
-    }
-    setStatus("ready");
-  });
+      .list({ sort: "rating" })
+      .then((data) => {
+        if (cancelled) return;
+        const projectsArray = Array.isArray(data) ? data : (data.projects || []);
+        setProjects(projectsArray.slice(0, 5));
+        setStatus("ready");
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        console.error("API Error:", err);
+        setStatus("error");
+      });
 
     return () => {
       cancelled = true;
     };
   }, []);
 
-  const totalTeams = new Set(projects.map((p) => p.team)).size;
+  const totalTeams = new Set(projects.map((p) => p.team_name || p.team)).size;
 
   return (
     <>
@@ -70,56 +64,17 @@ export default function Home() {
               <div className="position-relative">
                 <div className="sg-hero-mock bg-white p-3">
                   <div className="d-flex gap-2 mb-2">
-                    <span
-                      className="rounded-circle"
-                      style={{ width: 10, height: 10, background: "#f87171", display: "inline-block" }}
-                    ></span>
-                    <span
-                      className="rounded-circle"
-                      style={{ width: 10, height: 10, background: "#fbbf24", display: "inline-block" }}
-                    ></span>
-                    <span
-                      className="rounded-circle"
-                      style={{ width: 10, height: 10, background: "#34d399", display: "inline-block" }}
-                    ></span>
+                    <span className="rounded-circle" style={{ width: 10, height: 10, background: "#f87171", display: "inline-block" }}></span>
+                    <span className="rounded-circle" style={{ width: 10, height: 10, background: "#fbbf24", display: "inline-block" }}></span>
+                    <span className="rounded-circle" style={{ width: 10, height: 10, background: "#34d399", display: "inline-block" }}></span>
                   </div>
                   <div className="row g-2">
                     {projects.slice(0, 6).map((p) => (
                       <div className="col-4" key={p.id}>
-                        <div
-                          className="rounded"
-                          style={{
-                            height: 60,
-                            background: "linear-gradient(135deg,#6d28d9,#0a0e27)",
-                          }}
-                        ></div>
+                        <div className="rounded" style={{ height: 60, background: "linear-gradient(135deg,#6d28d9,#0a0e27)" }}></div>
                       </div>
                     ))}
                   </div>
-                </div>
-                <div
-                  className="sg-floating-badge"
-                  style={{ top: -18, right: "35%", background: "#7c5cfc" }}
-                >
-                  <i className="bi bi-code-slash"></i>
-                </div>
-                <div
-                  className="sg-floating-badge"
-                  style={{ top: 10, right: -20, background: "#10b981" }}
-                >
-                  <i className="bi bi-people-fill"></i>
-                </div>
-                <div
-                  className="sg-floating-badge"
-                  style={{ bottom: -20, right: -10, background: "#ec4899" }}
-                >
-                  <i className="bi bi-heart-fill"></i>
-                </div>
-                <div
-                  className="sg-floating-badge"
-                  style={{ top: "40%", left: -20, background: "#3b82f6" }}
-                >
-                  <i className="bi bi-star-fill"></i>
                 </div>
               </div>
             </div>

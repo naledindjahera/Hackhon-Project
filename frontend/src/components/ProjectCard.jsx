@@ -15,32 +15,37 @@ function badgeClass(tech) {
 }
 
 export default function ProjectCard({ project = {} }) {
-  // Safe fallbacks for missing properties
-  const title = project.name || project.title || "Untitled Project";
+  const title = project.title || project.name || "Untitled Project";
   const tagline = project.tagline || project.description || "";
-  const rating = typeof project.rating === "number" ? project.rating.toFixed(1) : "0.0";
+  const rating = Number(project.rating || 0).toFixed(1);
   const votes = project.votes || 0;
 
-  // Safely normalize tech stack into an array
+  // Normalize tech stack (DB uses techInput, mock used tech)
   let techList = [];
-  if (Array.isArray(project.tech)) {
-    techList = project.tech;
-  } else if (typeof project.tech === "string") {
+  const rawTech = project.techInput || project.tech;
+  if (Array.isArray(rawTech)) {
+    techList = rawTech;
+  } else if (typeof rawTech === "string") {
     try {
-      const parsed = JSON.parse(project.tech);
-      techList = Array.isArray(parsed) ? parsed : [project.tech];
+      const parsed = JSON.parse(rawTech);
+      techList = Array.isArray(parsed) ? parsed : [rawTech];
     } catch {
-      techList = project.tech.split(",").map((t) => t.trim());
+      techList = rawTech.split(",").map((t) => t.trim()).filter(Boolean);
     }
   }
 
-  // Handle uploaded images vs fallback text header
+  // Image URL normalization
   const rawImage = project.image || project.image_url;
-  const imageUrl = rawImage
-    ? rawImage.startsWith("http")
-      ? rawImage
-      : `http://localhost:5000/${rawImage.replace(/^\/+/, "")}`
-    : null;
+  let imageUrl = null;
+  if (rawImage) {
+    if (rawImage.startsWith("http")) {
+      imageUrl = rawImage;
+    } else if (rawImage.startsWith("/uploads/")) {
+      imageUrl = `http://localhost:5000${rawImage}`;
+    } else {
+      imageUrl = rawImage;
+    }
+  }
 
   return (
     <Link to={`/projects/${project.id || project._id}`} className="text-decoration-none">

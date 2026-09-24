@@ -305,3 +305,89 @@ a {
   .sg-hero { padding: 3rem 0 5rem; text-align: center; }
   .sg-hero p.lead { margin-left: auto; margin-right: auto; }
 }
+
+
+/* ---------- Authentication Buttons ---------- */
+.sg-btn-outline-primary {
+  background: transparent;
+  border: 2px solid var(--sg-violet-500);
+  color: var(--sg-violet-500);
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 0.55rem 1.3rem;
+  transition: all 0.15s ease;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.sg-btn-outline-primary:hover {
+  background: var(--sg-violet-500);
+  color: var(--sg-white);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(109, 40, 217, 0.3);
+}
+
+.sg-btn-outline-danger {
+  background: transparent;
+  border: 2px solid #dc2626;
+  color: #dc2626;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 0.55rem 1.3rem;
+  transition: all 0.15s ease;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.sg-btn-outline-danger:hover {
+  background: #dc2626;
+  color: var(--sg-white);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(220, 38, 38, 0.3);
+}
+
+/* ---------- Navbar user greeting ---------- */
+.sg-navbar .navbar-text {
+  color: #c7c9e0;
+  font-weight: 500;
+  margin-right: 0.5rem;
+}
+
+/* ---------- Mobile responsive adjustments ---------- */
+@media (max-width: 991px) {
+  .sg-navbar .navbar-nav {
+    margin: 0.5rem 0;
+  }
+  
+  .sg-navbar .d-flex.gap-2 {
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 0.5rem;
+  }
+}
+
+/* ---------- Navbar toggler (hamburger menu) ---------- */
+.sg-navbar .navbar-toggler {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.sg-navbar .navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.8)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* ---------- Optional: Add user avatar ---------- */
+.sg-user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--sg-violet-500);
+  color: var(--sg-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-right: 0.5rem;
+}
